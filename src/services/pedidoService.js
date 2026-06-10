@@ -73,19 +73,15 @@ async function criarPedido(dados) {
   const total = subtotal - desconto;
 
   const pedido = {
-    id: nextPedidoId(),
-    cliente: dados.cliente || null,
-    pais: pais.pais,
-    moeda: pais.moeda,
-    itens: itensPedido,
     subtotal,
     desconto: `${Math.round(percentualDesconto * 100)}%`,
-    descontoValor: desconto,
     total,
-    criadoEm: new Date().toISOString(),
+    pais: pais.nameCommon || pais.pais,
+    moeda: pais.moeda,
   };
 
-  pedidos.push(pedido);
+  // persist minimal info for listing/internal use
+  pedidos.push({ id: nextPedidoId(), cliente: dados.cliente || null, itens: itensPedido, ...pedido, criadoEm: new Date().toISOString() });
   return pedido;
 }
 

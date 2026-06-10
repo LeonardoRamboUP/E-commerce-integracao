@@ -4,8 +4,9 @@ async function obter(req, res, next) {
   try {
     const pais = await paisService.buscarPaisPorCodigo(req.params.codigo);
     return res.json({
-      pais: pais.pais,
+      pais: pais.nameCommon,
       moeda: pais.moeda,
+      currencies: pais.currencies,
     });
   } catch (erro) {
     return next(erro);

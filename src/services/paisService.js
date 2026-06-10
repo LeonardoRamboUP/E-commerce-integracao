@@ -21,15 +21,9 @@ async function buscarPaisPorCodigo(codigo) {
 
   return {
     codigo: codigoNormalizado,
-    pais: pais?.name?.common || pais?.translations?.por?.common || codigoNormalizado,
+    nameCommon: pais?.name?.common || pais?.translations?.por?.common || codigoNormalizado,
+    currencies: pais?.currencies || null,
     moeda: moedaEntrada ? moedaEntrada[0] : null,
-    moedaDetalhes: moedaEntrada
-      ? {
-          codigo: moedaEntrada[0],
-          nome: moedaEntrada[1].name,
-          simbolo: moedaEntrada[1].symbol,
-        }
-      : null,
   };
 }
 
