@@ -1,0 +1,20 @@
+{
+  "name": "e-commerce-integracao",
+  "version": "1.0.0",
+  "description": "API MVC para integração de e-commerce com produtos, pedidos e países",
+  "main": "app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test": "jest --runInBand",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}
