@@ -1,71 +1,101 @@
 # E-commerce - Integração
 
-Projeto de exemplo para integração de sistemas (API Node.js sem banco).
+Projeto de API Node.js em MVC para demo de integração entre produtos, pedidos, país e evento de compra finalizada.
 
-Instalação e execução
+## O que vamos mostrar
 
-1. Instale dependências:
+- Cadastro e atualização de produtos.
+- Criação de pedidos com validação de país via REST Countries.
+- Aplicação de desconto progressivo por quantidade.
+- Resposta de estoque insuficiente com mensagem clara.
+- Evento `POST /eventos/compra-finalizada` com resposta `202`.
+
+## Como rodar
 
 ```bash
 npm install
+npm start
 ```
 
-2. Rodar testes:
+## Como testar
 
 ```bash
 npm test
 ```
 
-3. Iniciar servidor:
+## Endpoints
+
+- `GET /produtos`
+- `POST /produtos`
+- `PUT /produtos/:id`
+- `POST /pedidos`
+- `GET /pedidos`
+- `GET /pais/:codigo`
+- `POST /eventos/compra-finalizada`
+
+## Exemplos rápidos (curl)
+
+- Listar produtos
 
 ```bash
-npm start
-# ou em dev
-npm run dev
+curl http://localhost:3000/produtos
 ```
 
-Endpoints principais (base: `http://localhost:3000`)
+- Criar produto
 
-- `GET /produtos` - lista produtos
-- `POST /produtos` - criar produto
-  Exemplo body:
-  ```json
-  { "nome": "Produto A", "preco": 100, "estoque": 10, "categoria": "geral" }
-  ```
-- `PUT /produtos/:id` - atualizar produto
-- `POST /pedidos` - criar pedido (valida país antes de tentar reservar estoque)
-  Exemplo body:
-  ```json
-  {
-    "cliente": "Carlos",
-    "paisCodigo": "BR",
-    "itens": [{ "produtoId": 1, "quantidade": 5 }]
-  }
-  ```
-- `GET /pedidos` - listar pedidos
-- `GET /pais/:codigo` - buscar nome e moeda do país (consome REST Countries)
-- `POST /eventos/compra-finalizada` - receber evento de compra finalizada
-  Exemplo body:
-  ```json
-  { "pedidoId": 1, "cliente": "Carlos", "pais": "BR", "total": 440.00, "moeda": "BRL" }
-  ```
+```bash
+curl -X POST http://localhost:3000/produtos \
+	-H "Content-Type: application/json" \
+	-d '{
+		"nome": "Produto A",
+		"preco": 100,
+		"estoque": 10,
+		"categoria": "geral"
+	}'
+```
 
-Formato de respostas importantes
+- Criar pedido (ex.: desconto 12% com 5 itens)
 
-- `POST /pedidos` retorna `201` com JSON contendo `subtotal`, `desconto` (ex.: "12%"), `total`, `pais` e `moeda`.
-- `POST /eventos/compra-finalizada` retorna `202 Accepted` com `{ "status": "aceito", "mensagem": "Compra #<id> em processamento" }`.
+```bash
+curl -X POST http://localhost:3000/pedidos \
+	-H "Content-Type: application/json" \
+	-d '{
+		"cliente": "Carlos",
+		"paisCodigo": "BR",
+		"itens": [{ "produtoId": 1, "quantidade": 5 }]
+	}'
+```
 
-Testes
+- Consultar país
 
-- Os testes obrigatórios estão em `__tests__/pedido.test.js` e cobrem:
-  - cálculo do desconto progressivo
-  - rejeição por estoque insuficiente
-  - criação de pedido com desconto e moeda
+```bash
+curl http://localhost:3000/pais/BR
+```
 
-Thunder Client
+- Evento — compra finalizada
 
-Importe `thunder-collection.json` na sua extensão Thunder Client para a coleção de exemplos usada na apresentação.
+```bash
+curl -X POST http://localhost:3000/eventos/compra-finalizada \
+	-H "Content-Type: application/json" \
+	-d '{ "pedidoId": 1, "cliente": "Carlos", "pais": "BR", "total": 440.00, "moeda": "BRL" }'
+```
 
-Observações
+## Regras principais
 
-- Este projeto usa uma store em memória (`src/data/store.js`). Reinicie o servidor para limpar o estado.
+- 1-2 itens: sem desconto
+- 3-4 itens: 5%
+- 5+ itens: 12%
+- País inválido: `400` antes de criar o pedido
+- Estoque insuficiente: `400` com item e quantidade disponível
+
+## Resposta esperada no pedido
+
+- `subtotal`
+- `desconto`
+- `total`
+- `pais`
+- `moeda`
+
+## Observação
+
+- A aplicação usa armazenamento em memória, então os dados são perdidos ao reiniciar o servidor.
