@@ -52,6 +52,54 @@ describe('Fluxo de pedidos', () => {
     ).rejects.toThrow('Produto C - disponível: 2');
   });
 
+  test('rejeita pedido com itens inválidos', async () => {
+    mockPaisValido();
+
+    await request(app)
+      .post('/produtos')
+      .send({ nome: 'Produto D', preco: 70, estoque: 5, categoria: 'geral' })
+      .expect(201);
+
+    await expect(
+      criarPedido({
+        cliente: 'Carlos',
+        paisCodigo: 'BR',
+        itens: [{ produtoId: 'abc', quantidade: 2 }],
+      })
+    ).rejects.toMatchObject({
+      message: 'Item 1 deve informar produtoId válido',
+      statusCode: 400,
+    });
+  });
+
+  test('POST /pedidos retorna 503 quando a API de países falha', async () => {
+    global.fetch.mockRejectedValue(new Error('network error'));
+
+    await request(app)
+      .post('/produtos')
+      .send({ nome: 'Produto E', preco: 90, estoque: 5, categoria: 'geral' })
+      .expect(201);
+
+    const resposta = await request(app)
+      .post('/pedidos')
+      .send({
+        cliente: 'Carlos',
+        paisCodigo: 'BR',
+        itens: [{ produtoId: 1, quantidade: 1 }],
+      })
+      .expect(503);
+
+    expect(resposta.body.erro).toBe('Serviço de país indisponível no momento');
+  });
+
+  test('POST /eventos/compra-finalizada exige pedidoId', async () => {
+    await request(app)
+      .post('/eventos/compra-finalizada')
+      .send({ cliente: 'Carlos' })
+      .expect(400)
+      .expect({ erro: 'pedidoId é obrigatório' });
+  });
+
   test('POST /pedidos retorna 201 com desconto e moeda', async () => {
     mockPaisValido();
 

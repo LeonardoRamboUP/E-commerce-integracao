@@ -2,28 +2,32 @@
 
 Projeto de API Node.js em MVC para demo de integração entre produtos, pedidos, país e evento de compra finalizada.
 
-## O que vamos mostrar
+## Parte 1 - Visão geral
+
+Fluxo principal da API:
 
 - Cadastro e atualização de produtos.
 - Criação de pedidos com validação de país via REST Countries.
 - Aplicação de desconto progressivo por quantidade.
 - Resposta de estoque insuficiente com mensagem clara.
+- Validação de itens inválidos antes de processar o pedido.
+- Tratamento de indisponibilidade da API de países com resposta `503`.
 - Evento `POST /eventos/compra-finalizada` com resposta `202`.
 
-## Como rodar
+## Parte 2 - Como rodar
 
 ```bash
 npm install
 npm start
 ```
 
-## Como testar
+## Parte 3 - Como testar
 
 ```bash
 npm test
 ```
 
-## Endpoints
+## Parte 4 - Endpoints
 
 - `GET /produtos`
 - `POST /produtos`
@@ -33,15 +37,15 @@ npm test
 - `GET /pais/:codigo`
 - `POST /eventos/compra-finalizada`
 
-## Exemplos rápidos (curl)
+## Parte 5 - Exemplos rápidos
 
-- Listar produtos
+### Listar produtos
 
 ```bash
 curl http://localhost:3000/produtos
 ```
 
-- Criar produto
+### Criar produto
 
 ```bash
 curl -X POST http://localhost:3000/produtos \
@@ -54,7 +58,7 @@ curl -X POST http://localhost:3000/produtos \
 	}'
 ```
 
-- Criar pedido (ex.: desconto 12% com 5 itens)
+### Criar pedido
 
 ```bash
 curl -X POST http://localhost:3000/pedidos \
@@ -66,13 +70,13 @@ curl -X POST http://localhost:3000/pedidos \
 	}'
 ```
 
-- Consultar país
+### Consultar país
 
 ```bash
 curl http://localhost:3000/pais/BR
 ```
 
-- Evento — compra finalizada
+### Evento de compra finalizada
 
 ```bash
 curl -X POST http://localhost:3000/eventos/compra-finalizada \
@@ -80,15 +84,17 @@ curl -X POST http://localhost:3000/eventos/compra-finalizada \
 	-d '{ "pedidoId": 1, "cliente": "Carlos", "pais": "BR", "total": 440.00, "moeda": "BRL" }'
 ```
 
-## Regras principais
+## Parte 6 - Regras principais
 
 - 1-2 itens: sem desconto
 - 3-4 itens: 5%
 - 5+ itens: 12%
 - País inválido: `400` antes de criar o pedido
+- Falha de rede/timeout na API de países: `503` sem criar o pedido
 - Estoque insuficiente: `400` com item e quantidade disponível
+- `POST /eventos/compra-finalizada` exige `pedidoId`
 
-## Resposta esperada no pedido
+## Parte 7 - Resposta esperada no pedido
 
 - `subtotal`
 - `desconto`
@@ -96,6 +102,7 @@ curl -X POST http://localhost:3000/eventos/compra-finalizada \
 - `pais`
 - `moeda`
 
-## Observação
+## Parte 8 - Observação
 
 - A aplicação usa armazenamento em memória, então os dados são perdidos ao reiniciar o servidor.
+- Ao iniciar com `npm start`, a API sobe com produtos iniciais para a demo.

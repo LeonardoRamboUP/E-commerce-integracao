@@ -2,6 +2,33 @@ const { pedidos, nextPedidoId } = require('../data/store');
 const { obterProdutoPorId, reservarEstoque } = require('./produtoService');
 const { buscarPaisPorCodigo } = require('./paisService');
 
+function criarErro(mensagem, statusCode) {
+  const erro = new Error(mensagem);
+  erro.statusCode = statusCode;
+  return erro;
+}
+
+function normalizarItens(itens) {
+  if (!Array.isArray(itens) || itens.length === 0) {
+    throw criarErro('Pedido deve conter itens', 400);
+  }
+
+  return itens.map((item, indice) => {
+    const produtoId = Number(item?.produtoId);
+    const quantidade = Number(item?.quantidade);
+
+    if (!Number.isInteger(produtoId) || produtoId <= 0) {
+      throw criarErro(`Item ${indice + 1} deve informar produtoId válido`, 400);
+    }
+
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+      throw criarErro(`Item ${indice + 1} deve informar quantidade válida`, 400);
+    }
+
+    return { produtoId, quantidade };
+  });
+}
+
 function calcularPercentualDesconto(totalItens) {
   if (totalItens >= 5) {
     return 0.12;
@@ -16,18 +43,7 @@ function calcularPercentualDesconto(totalItens) {
 
 async function criarPedido(dados) {
   const pais = await buscarPaisPorCodigo(dados.paisCodigo);
-  const itens = Array.isArray(dados.itens) ? dados.itens : [];
-
-  if (itens.length === 0) {
-    const erro = new Error('Pedido deve conter itens');
-    erro.statusCode = 400;
-    throw erro;
-  }
-
-  const itensNormalizados = itens.map((item) => ({
-    produtoId: Number(item.produtoId),
-    quantidade: Number(item.quantidade),
-  }));
+  const itensNormalizados = normalizarItens(dados.itens);
 
   const itensPedido = [];
   let subtotal = 0;

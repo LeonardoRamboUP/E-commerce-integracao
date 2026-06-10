@@ -4,6 +4,7 @@ const produtoRoutes = require('./src/routes/produtoRoutes');
 const pedidoRoutes = require('./src/routes/pedidoRoutes');
 const paisRoutes = require('./src/routes/paisRoutes');
 const eventoRoutes = require('./src/routes/eventoRoutes');
+const { seedProdutos } = require('./src/data/seed');
 
 const app = express();
 
@@ -27,6 +28,8 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
+
+  seedProdutos();
 
   app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
